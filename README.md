@@ -10,7 +10,7 @@ ACLRNet is a stereo image restoration framework, including stereo image denoisin
 </p>
 
 ## Requirement:
-* **Python 3.7.9, PyTorch 1.8.1, torchvision 0.9.1 and and CUDA 10.2**
+* **Python 3.7.9, skimage 0.16.2, PyTorch 1.8.1, torchvision 0.9.1 and CUDA 10.2**
 * **Matlab (For training data generation)**
 
 ### Train:
