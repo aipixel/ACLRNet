@@ -14,7 +14,7 @@ ACLRNet is a stereo image restoration framework, including stereo image denoisin
 * **Matlab (For training data generation)**
 
 ### Train:
-* **Download the training dataset Flickr1024_train from [Baidu Drive](https://pan.baidu.com/s/1Ov1bXigTA_F0OyXPDRPGHA ) (Key: zk3m) and unzip them to `./data/train`.** 
+* **Download the training dataset Flickr1024_train from [Baidu Drive](https://pan.baidu.com/s/1Ov1bXigTA_F0OyXPDRPGHA ) (Key: zk3m) and unzip ititit to `./data/train`.** 
 * **Run `./data/GenerateTrainingPatches.m` to generate training patches. The scales are set to 1, 2, 4 for different restoration tasks.**
 * **Run `train.py` to perform training. Checkpoint will be saved to  `./log/`.**
 
