@@ -68,7 +68,6 @@ class CALayer(nn.Module):
         return x * y
 
 
-
 #SKFF
 class SKConv(nn.Module):
     def __init__(self,in_channels,out_channels,stride=1, M=3, r=16, L=32):
@@ -94,20 +93,19 @@ class SKConv(nn.Module):
         output=[]
         #the part of split
         for i,conv in enumerate(self.conv):
-            #print(i,conv(input).size())
             output.append(conv(input))
         #the part of fusion
-        U=reduce(lambda x,y:x+y,output) # 逐元素相加生成 混合特征U
+        U=reduce(lambda x,y:x+y,output)
         s=self.global_pool(U)
-        z=self.fc1(s)  # S->Z降维
-        a_b=self.fc2(z) # Z->a，b 升维  论文使用conv 1x1表示全连接。结果中前一半通道值为a,后一半为b
-        a_b=a_b.reshape(batch_size,self.M,self.out_channels,-1) #调整形状，变为 两个全连接层的值
-        a_b=self.softmax(a_b) # 使得两个全连接层对应位置进行softmax
+        z=self.fc1(s)  # S->Z
+        a_b=self.fc2(z) # Z->a，b
+        a_b=a_b.reshape(batch_size,self.M,self.out_channels,-1)
+        a_b=self.softmax(a_b)
         #the part of selection
-        a_b=list(a_b.chunk(self.M, dim=1))#split to a and b   chunk为pytorch方法，将tensor按照指定维度M切分成 几个tensor块
-        a_b=list(map(lambda x:x.reshape(batch_size,self.out_channels,1,1),a_b)) # 将所有分块  调整形状，即扩展两维
-        V=list(map(lambda x,y:x*y,output,a_b)) # 权重与对应  不同卷积核输出的U 逐元素相乘
-        V=reduce(lambda x,y:x+y,V) # 两个加权后的特征 逐元素相加
+        a_b=list(a_b.chunk(self.M, dim=1))#split to a and b
+        a_b=list(map(lambda x:x.reshape(batch_size,self.out_channels,1,1),a_b))
+        V=list(map(lambda x,y:x*y,output,a_b))
+        V=reduce(lambda x,y:x+y,V)
         return V
 
 class ResB(nn.Module):
@@ -115,7 +113,6 @@ class ResB(nn.Module):
         super(ResB, self).__init__()
         self.body = nn.Sequential(
             nn.Conv2d(channels, channels, 3, 1, 1, groups=4, bias=True),
-            # nn.LeakyReLU(0.1, inplace=True),
             nn.SiLU(inplace=True),
             nn.Conv2d(channels, channels, 3, 1, 1, groups=4, bias=True),
         )
@@ -124,7 +121,7 @@ class ResB(nn.Module):
         out = self.body(x)
         return out + x
 
-class SPAM(nn.Module):  # 视差注意力机制
+class SPAM(nn.Module): 
     def __init__(self, channels, nb):
         super(SPAM, self).__init__()
         self.bq = nn.Conv2d(nb * channels, channels, 1, 1, 0, groups=nb, bias=True)
@@ -301,13 +298,12 @@ class LinearAttention(nn.Module):
         return queried_values.contiguous()
 
 
-
-class LoFTREncoderLayer(nn.Module):   #
+class EncoderLayer(nn.Module):   #
     def __init__(self,
                  d_model,
                  nhead,
                  attention='linear'):
-        super(LoFTREncoderLayer, self).__init__()
+        super(EncoderLayer, self).__init__()
 
         self.dim = d_model // nhead
         self.nhead = nhead
@@ -358,7 +354,7 @@ class NonLocalAttention(nn.Module):
         self.d_model = d_model
         self.nhead = nhead
         self.layer_names = layer_names
-        encoder_layer = LoFTREncoderLayer(d_model, nhead, attention)
+        encoder_layer = EncoderLayer(d_model, nhead, attention)
         self.layers = nn.ModuleList([copy.deepcopy(encoder_layer) for _ in range(len(self.layer_names))])
 
     def forward(self, feat0, feat1, mask0=None, mask1=None):
